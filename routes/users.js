@@ -1,25 +1,24 @@
 var express = require('express');
-const { token } = require('morgan');
 var router = express.Router();
-var userControllers = require('../controllers/users')
-let jwt = require('jsonwebtoken');
+var userControllers = require('../controllers/users');
 let { check_authentication, check_authorization } = require("../utils/check_auth");
 const constants = require('../utils/constants');
 
-/* GET users listing. */
-router.get('/', check_authentication, check_authorization(['admin'])
-  , async function (req, res, next) {
-    try {
-      let users = await userControllers.getAllUsers()
-      res.send({
-        success: true,
-        data: users
-      });
-    } catch (error) {
-      next(error)
-    }
-  });
-router.post('/', check_authentication, check_authorization(constants.ADMIN_PERMISSION), async function (req, res, next) {
+// GET ALL: Yêu cầu quyền mod
+router.get('/', check_authentication, check_authorization(constants.MOD_PERMISSION), async function(req, res, next) {
+  try {
+    let users = await userControllers.getAllUsers();
+    res.send({
+      success: true,
+      data: users
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST: Yêu cầu quyền admin
+router.post('/', check_authentication, check_authorization(constants.ADMIN_PERMISSION), async function(req, res, next) {
   try {
     let body = req.body;
     let newUser = await userControllers.createAnUser(
@@ -27,7 +26,7 @@ router.post('/', check_authentication, check_authorization(constants.ADMIN_PERMI
       body.password,
       body.email,
       body.role
-    )
+    );
     res.status(200).send({
       success: true,
       message: newUser
@@ -38,9 +37,10 @@ router.post('/', check_authentication, check_authorization(constants.ADMIN_PERMI
       message: error.message
     });
   }
-
 });
-router.put('/:id', async function (req, res, next) {
+
+// PUT: Yêu cầu quyền admin
+router.put('/:id', check_authentication, check_authorization(constants.ADMIN_PERMISSION), async function(req, res, next) {
   try {
     let body = req.body;
     let updatedUser = await userControllers.updateAnUser(req.params.id, body);
@@ -49,10 +49,12 @@ router.put('/:id', async function (req, res, next) {
       message: updatedUser
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
 });
-router.delete('/:id', async function (req, res, next) {
+
+// DELETE: Yêu cầu quyền admin
+router.delete('/:id', check_authentication, check_authorization(constants.ADMIN_PERMISSION), async function(req, res, next) {
   try {
     let deleteUser = await userControllers.deleteAnUser(req.params.id);
     res.status(200).send({
@@ -60,8 +62,8 @@ router.delete('/:id', async function (req, res, next) {
       message: deleteUser
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
-
 });
+
 module.exports = router;

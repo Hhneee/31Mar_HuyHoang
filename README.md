@@ -1,2 +1,2 @@
-# NNPTUD_S2
-# Vào nhánh mỗi ngày để lấy code
+# N2180607524
+# Nguyễn Dương Huy Hoàng
